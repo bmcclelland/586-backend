@@ -43,7 +43,7 @@ Key | Example | Function
 `http_listen_addr`  | `http://0.0.0.0:8001` | 
 `sqlite_db_path`    | `db.sqlite` |
 `auth_issuer`       | `https://dev-ztmxpnax.auth0.com/` |
-`auth_default_role` | `default` | Users other than `auth_bootstrap_admin_user` are given this role upon FIRST login. It is NOT automatically generated, so it must be created before other users can log in.
+`auth_default_role` | `default` | Users other than `auth_bootstrap_admin_user` are given this role upon FIRST login. If it does not exist, it will be automatically generated with no permissions. 
 `auth_admin_role`   | `administrator` | This role is given to `auth_bootstrap_admin_user` upon any login. If it does not exist, it will be automatically generated with full permissions.
 `auth_bootstrap_admin_user` | `oath2\|xxxx` |
 `auth_public_key` | | Auth0 public key used to verify JWTs.

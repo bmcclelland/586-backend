@@ -57,6 +57,7 @@ namespace mvc
         , _auth_config(auth_config)
     {
         bootstrap_admin();
+        bootstrap_default();
     }
 
     void Authenticator::bootstrap_admin() const
@@ -84,6 +85,24 @@ namespace mvc
                 admin_user->roles.insert(admin_role);
                 _db->persist(admin_user);
                 println("Bootstrapped admin user");
+            }
+        });
+    }
+    
+    void Authenticator::bootstrap_default() const
+    {
+        RoleID default_role_id = _auth_config.default_role();
+
+        _db->transact([&]
+        {
+            Shared<Role> default_role = _db->find_shared(default_role_id);
+
+            if (!default_role)
+            {
+                Set<Perm> default_perms{}; // TODO defineable?
+                default_role = std::make_shared<Role>(default_role_id, default_perms);
+                _db->persist(default_role);
+                println("Bootstrapped default role");
             }
         });
     }

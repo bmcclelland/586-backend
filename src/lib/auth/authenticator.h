@@ -18,6 +18,7 @@ namespace mvc
             Set<Perm> get_perms(AuthSubject const&) const;
             Shared<Role> get_default_role() const;
             void bootstrap_admin() const;
+            void bootstrap_default() const;
 
             Unique<IDatabase> _db;
             AuthConfig _auth_config;
