@@ -2,6 +2,10 @@
 
 Backend API server for issue tracking app written in C++. Create projects, workers, and tasks and assign things to things.
 
+[Frontend Repository](https://github.com/bmcclelland/586-frontend)
+
+[Application](http://586-frontend.s3-website-us-east-1.amazonaws.com/)
+
 ## Libraries
 
 ORM: [ODB](https://www.codesynthesis.com/products/odb). Uses a separate compiler to generate code from annotated classes.
