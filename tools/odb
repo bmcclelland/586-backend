@@ -1,0 +1,16 @@
+#!/bin/env bash
+
+std=c++17
+include=$(pwd)/src/lib
+db=sqlite
+
+odb \
+    -d "$db" \
+    --std "$std" \
+    -I "$include" \
+    --generate-query \
+    --generate-schema \
+    --hxx-suffix .h \
+    --ixx-suffix .i \
+    --cxx-suffix .cpp \
+    $@

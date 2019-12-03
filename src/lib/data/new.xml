@@ -1,0 +1,83 @@
+<changelog xmlns="http://www.codesynthesis.com/xmlns/odb/changelog" database="sqlite" version="1">
+  <model version="1">
+    <table name="Role" kind="object">
+      <column name="name" type="TEXT" null="false"/>
+      <primary-key>
+        <column name="name"/>
+      </primary-key>
+    </table>
+    <table name="Role_perms" kind="container">
+      <column name="object_id" type="TEXT" null="false"/>
+      <column name="value" type="INTEGER" null="false"/>
+      <foreign-key name="object_id_fk" on-delete="CASCADE">
+        <column name="object_id"/>
+        <references table="Role">
+          <column name="name"/>
+        </references>
+      </foreign-key>
+      <index name="Role_perms_object_id_i">
+        <column name="object_id"/>
+      </index>
+    </table>
+    <table name="User" kind="object">
+      <column name="id" type="TEXT" null="false"/>
+      <primary-key>
+        <column name="id"/>
+      </primary-key>
+    </table>
+    <table name="User_roles" kind="container">
+      <column name="object_id" type="TEXT" null="false"/>
+      <column name="value" type="TEXT" null="false"/>
+      <foreign-key name="object_id_fk" on-delete="CASCADE">
+        <column name="object_id"/>
+        <references table="User">
+          <column name="id"/>
+        </references>
+      </foreign-key>
+      <index name="User_roles_object_id_i">
+        <column name="object_id"/>
+      </index>
+      <foreign-key name="value_fk" deferrable="DEFERRED">
+        <column name="value"/>
+        <references table="Role">
+          <column name="name"/>
+        </references>
+      </foreign-key>
+    </table>
+    <table name="Task" kind="object">
+      <column name="id" type="INTEGER" null="false"/>
+      <column name="name" type="TEXT" null="false"/>
+      <column name="project" type="INTEGER" null="false"/>
+      <column name="worker" type="INTEGER" null="true"/>
+      <primary-key auto="true">
+        <column name="id"/>
+      </primary-key>
+      <foreign-key name="project_fk" deferrable="DEFERRED">
+        <column name="project"/>
+        <references table="Project">
+          <column name="id"/>
+        </references>
+      </foreign-key>
+      <foreign-key name="worker_fk" deferrable="DEFERRED">
+        <column name="worker"/>
+        <references table="Worker">
+          <column name="id"/>
+        </references>
+      </foreign-key>
+    </table>
+    <table name="Project" kind="object">
+      <column name="id" type="INTEGER" null="false"/>
+      <column name="name" type="TEXT" null="false"/>
+      <primary-key auto="true">
+        <column name="id"/>
+      </primary-key>
+    </table>
+    <table name="Worker" kind="object">
+      <column name="id" type="INTEGER" null="false"/>
+      <column name="name" type="TEXT" null="false"/>
+      <primary-key auto="true">
+        <column name="id"/>
+      </primary-key>
+    </table>
+  </model>
+</changelog>

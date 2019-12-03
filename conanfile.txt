@@ -1,0 +1,6 @@
+[requires]
+boost/1.66.0@conan/stable
+cpprestsdk/2.10.2@bincrafters/stable 
+
+[generators]
+cmake
