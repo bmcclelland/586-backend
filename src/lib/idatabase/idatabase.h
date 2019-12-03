@@ -88,6 +88,12 @@ namespace mvc
             }
             
             template <typename T>
+            auto update(T&& t)
+            {
+                return get().update(std::forward<T>(t));
+            }
+            
+            template <typename T>
             odb::result<T> query()
             {
                 return get().query<T>();
