@@ -16,7 +16,7 @@ HTTP: [CPP Rest SDK](https://github.com/Microsoft/cpprestsdk). Routing is done w
 
 JSON: [JSON for Modern C++](https://github.com/nlohmann/json)
 
-JWT: [JWT-CPP](https://github.com/pokowaka/jwt-cpp)
+JWT: [JWT-CPP](https://github.com/thalhammer/jwt-cpp)
 
 ## Building
 
