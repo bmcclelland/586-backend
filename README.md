@@ -47,5 +47,6 @@ Key | Example | Function
 `auth_admin_role`   | `administrator` | This role is given to `auth_bootstrap_admin_user` upon any login. If it does not exist, it will be automatically generated with full permissions.
 `auth_bootstrap_admin_user` | `oath2\|xxxx` |
 `auth_public_key` | | Auth0 public key used to verify JWTs.
+`auth_jwt_leeway_secs` | `60` | Seconds of leeway in JWT expiry checks.
 
 Additionally, any key can be loaded from a separate file by locating the key under `load_from_files`, e.g. `"load_from_files" : { "auth_public_key": "auth.pub"}`.

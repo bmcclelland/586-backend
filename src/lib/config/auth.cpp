@@ -8,6 +8,7 @@ namespace mvc
         , _default_role{config.get_string("auth_default_role")}
         , _admin_role{config.get_string("auth_admin_role")}
         , _bootstrap_admin_user{config.get_string("auth_bootstrap_admin_user")}
+        , _jwt_leeway_secs{static_cast<size_t>(config.get_int("auth_jwt_leeway_secs"))}
     {}
 
     AuthPublicKey AuthConfig::public_key() const
@@ -33,5 +34,10 @@ namespace mvc
     UserID AuthConfig::bootstrap_admin_user() const
     {
         return _bootstrap_admin_user;
+    }
+
+    AuthJwtLeeway AuthConfig::jwt_leeway_secs() const
+    {
+        return _jwt_leeway_secs;
     }
 }

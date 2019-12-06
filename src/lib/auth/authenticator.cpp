@@ -26,11 +26,15 @@ namespace mvc
         {
             auto const decoded_jwt = decode_jwt(token);
             auto const verifier = jwt::verify()
+                .leeway(
+                    auth_config.jwt_leeway_secs().val()
+                )
                 .allow_algorithm(
                     jwt::algorithm::rs256(auth_config.public_key().val())
                 )
-                .with_issuer(auth_config.issuer().val());
-
+                .with_issuer(
+                    auth_config.issuer().val()
+                );
             verifier.verify(decoded_jwt);
             println("JWT verification succeeded");
             return AuthSubject{

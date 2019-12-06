@@ -10,6 +10,7 @@ namespace mvc
     NEW_TYPE(String, AuthPublicKey);
     NEW_TYPE(String, AuthIssuer);
     NEW_TYPE(String, AuthSubject);
+    NEW_TYPE(size_t, AuthJwtLeeway);
 
     class AuthConfig
     {
@@ -20,6 +21,7 @@ namespace mvc
             RoleID default_role() const;
             RoleID admin_role() const;
             UserID bootstrap_admin_user() const;
+            AuthJwtLeeway jwt_leeway_secs() const;
 
         private:
             AuthPublicKey _public_key;
@@ -27,5 +29,6 @@ namespace mvc
             RoleID        _default_role;
             RoleID        _admin_role;
             UserID        _bootstrap_admin_user;
+            AuthJwtLeeway _jwt_leeway_secs;
     };
 }
