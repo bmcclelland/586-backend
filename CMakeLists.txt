@@ -29,6 +29,10 @@ set(MVC_SOURCES
     src/lib/data/new.cpp
     src/lib/data/new-odb.cpp
     src/lib/idatabase/sqlitedatabase.cpp
+    src/lib/iendpoint/getroles.cpp
+    src/lib/iendpoint/getprojects.cpp
+    src/lib/iendpoint/getproject.cpp
+    src/lib/iendpoint/addproject.cpp
     src/lib/ihandler/httphandler.cpp
     src/lib/ihandler/getjwt.cpp
     src/lib/irouter/apirouter.cpp
@@ -47,6 +51,15 @@ set(MVC_LIBS
     ${CONAN_LIBS}
 )
 
+set(PROJROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_custom_command(
+    OUTPUT ${PROJROOT}/src/lib/data/new-odb.cpp 
+    DEPENDS ${PROJROOT}/src/lib/data/new.h
+    COMMAND ${PROJROOT}/tools/odb
+    "${PROJROOT}"
+)
+
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(MVC_LIBS ${MVC_LIBS}
         stdc++fs
@@ -56,12 +69,12 @@ endif ()
 
 set(MVC_INCLUDES
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/lib
+        ${PROJROOT}/src/lib
     SYSTEM
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/variant-1.1.6/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/jwt-cpp-0.3.1/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost-di/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/nlohmann-json/include
+        ${PROJROOT}/external/variant-1.1.6/include
+        ${PROJROOT}/external/jwt-cpp-0.3.1/include
+        ${PROJROOT}/external/boost-di/include
+        ${PROJROOT}/external/nlohmann-json/include
 )
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
