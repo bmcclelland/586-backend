@@ -3,6 +3,7 @@
 #include "server/apiparse.h"
 #include "data/data.h"
 #include <iostream>
+#include <filesystem>
 
 #include "app/app.h"
 #include "di.h"
@@ -18,24 +19,20 @@ namespace mvc::test
     {
         return s << type_name<Tag> << "(" << x.val() << ")";
     }
+    
+    static
+    void clear_db()
+    {
+        static SqliteConfig const config(
+            DI::make_injector().create<Config>()
+            );
 
-    //TEST(model,
-    //    Model model = initial_model();
-    //    Controller controller = new_controller<TestController>();
-    //    TEST_TRUE(model.records.size() == 0);
-    //    
-    //    Request req = AddRecordRequest(
-    //        Record(
-    //            LastName("Sheckler"),
-    //            FirstName("Ted")
-    //            )
-    //        );
-    //
-    //    controller->mutate(model, req);
-    //    TEST_TRUE(model.records.size() == 1);
-    //    TEST_EQ(model.records[0].last_name(), LastName("Sheckler"));
-    //    TEST_EQ(model.records[0].first_name(), FirstName("Ted"));
-    //)
+        static String const db_path(
+            config.db_path().val()
+            );
+
+        std::filesystem::remove(db_path);
+    }
 
     template <typename... Ts>
     static
@@ -44,99 +41,9 @@ namespace mvc::test
         return ApiPath{ApiSegment(ts)...};
     }
 
-    TEST(odb,
-    //    try
-    //    {
-    //        Unique<odb::core::database> db(
-    //            new odb::sqlite::database(
-    //                "test.sqlite",
-    //                SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
-    //            )
-    //        );
-    //		
-    //
-    //        auto transact = [&db](auto&& f)
-    //		{
-    //			odb::transaction t(db->begin());
-    //			f();
-    //			t.commit();
-    //		};
-    //
-    //
-    //		transact([&]{ 
-    //            odb::schema_catalog::create_schema(*db);
-    //        });
-    //
-    //		int p1_id, p2_id;
-    //        
-    //        transact([&]{
-    //            Project p1;
-    //            p1.name = "Master Plan";
-    //            Project p2;
-    //            p2.name = "Side Project";
-    //            p1_id = db->persist(p1);
-    //            p2_id = db->persist(p2);
-    //        });
-                
     //Only T needs persisting. It's the forward relationship.
     //p->tasks.push_back(t);
     //db->persist(p);
-
-    //		transact([&]{
-    //			Shared<Project> p1 = db->find<Project>(p1_id);
-    //			Shared<Project> p2(db->load<Project>(p2_id));
-    //			
-    //			Task t1;
-    //			t1.name = "Task 1";
-    //			t1.project = p1;
-    //			db->persist(t1);
-    //			
-    //			Task t2;
-    //			t2.name = "Task 2";
-    //			t2.project = p1;
-    //			db->persist(t2);
-    //			
-    //			Task t3;
-    //			t3.name = "Task 3";
-    //			t3.project = p2;
-    //			db->persist(t3);
-    //		});
-    //
-    //		transact([&]{
-    //			for (auto&& row : db->query<Task>())
-    //			{
-    //				std::cout << "Task: ("
-    //					<< row.id 
-    //                    << "," 
-    //                    << row.name;
-    //				
-    //				row.project.load();
-    //				std::cout << "," << row.project->id << "\n";
-    //			}
-    //		});
-                
-    //		transact([&]{
-    //			for (auto row : db->query<Project>())
-    //			{
-    //				std::cout << "PROJECT: " << row.name << "\n";
-    //				for (auto&& t : row.tasks)
-    //				{
-    //					auto u = t.load();
-    //					std::cout << "  " << u->name << "\n";
-    //				}
-    //			}
-    //		});
-    //    }
-    //    catch (const odb::exception& e)
-    //    {
-    //        std::cerr << e.what () << std::endl;
-    //    }
-    )
-
-    TEST(new_api,
-    //    auto s = lol();
-    //    TEST_EQ(s, "get_projects");
-    )
 
     TEST(path1, // Normal path
         using namespace mvc::api_parsers;
@@ -186,75 +93,71 @@ namespace mvc::test
         Option<Tuple<>> result = Api::parse(path);
         TEST_TRUE(result != nullopt);
     )
+    
+    TEST(project,
+        auto injector = DI::make_injector();
+        auto rtr = injector.create<Unique<IRouter>>();
+        Actor admin("test|admin", {Perm::administrate});
+    
+        auto run_test = [&](Json&& json, auto const&... path)
+        {
+            EndpointInput input(std::move(json), admin);
+            auto output = rtr->route(test_path("api", path...), input);
+
+            if (output)
+            {
+                return output->payload;
+            }
+            else
+            {
+                return Json{"nullopt"};
+            }
+        };
+
+        clear_db();
+        run_test({{"name", "p"}}, "add_project");
+        run_test({{"name", "t"}, {"project_id", 1}}, "add_task");
+        run_test({}, "get_projects");
+        Json actual = run_test({}, "get_project", "1");
+        
+        Json ideal_task{
+            {"id", 1}, 
+            {"name", "t"}, 
+            {"project", 1}, 
+            {"worker", nullptr}
+        };
+        Json ideal{
+            {"id", 1},
+            {"name", "p"},
+            {"tasks", { ideal_task } } 
+        };
+
+        TEST_EQ(actual, ideal);
+    )
 
     void main()
     {
-        Config const config("config.test.json"); // TODO
-        
-        // NB: boost::di binds values by reference, leading to easy UB!
-        // Giving them static lifetimes solves this.
-        static HttpConfig   const http_config(config);
-        static AuthConfig   const auth_config(config);
-        static SqliteConfig const sqlite_config(config);
         
         DI::make_injector = []()
         {
             return di::make_injector(
-                di::bind<IServer>.to<HttpServer>(),
-                di::bind<IHandler>.to<HttpHandler>(),
-                di::bind<IRouter>.to<ApiRouter>(),
-                di::bind<IDatabase>.to<SqliteDatabase>(),
-                di::bind<>.to(http_config),
-                di::bind<>.to(sqlite_config),
-                di::bind<>.to(auth_config)
+                di::bind<IServer>.to<HttpServer>().in(di::unique),
+                di::bind<IHandler>.to<HttpHandler>().in(di::unique),
+                di::bind<IRouter>.to<ApiRouter>().in(di::unique),
+                di::bind<IDatabase>.to<SqliteDatabase>().in(di::unique),
+                di::bind<>.to(ConfigPath("config.test.json"))
             );
         };
-
+        
         auto app = DI::make_injector().create<App>();
         (void)app;
-        
         run_all();
-//    show_view();
     }
 
-    void debug()
-    {
-        Unique<IDatabase> db = DI::make_injector().create<Unique<IDatabase>>();
-
-        RoleID rid1{"default"};
-        RoleID rid2{"administrator"};
-        UserID uid{"someuniqueauth0id"};
-           
-        db->transact([&]
-        {
-            Role r1(rid1, {Perm::view_project});
-            db->persist(r1);
-
-            Role r2(rid2, {Perm::administrate});
-            db->persist(r2);
-            
-            User u(uid);
-            u.roles.insert(std::make_shared<Role>(r2));
-            db->persist(u);
-        });
-
-        Option<User> u = db->find_value(uid);
-
-        if (u)
-        {
-            println(u->id);
-            
-            for (auto&& r : u->roles)
-            {
-                println("role: ", r->name);
-            }
-        }
-    }
 }
 
 int main()
 {
     mvc::test::main();
-    mvc::test::debug();
     return 0;
 }

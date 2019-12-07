@@ -22,25 +22,12 @@ namespace mvc::endpoints
             
             Requirements requirements() const override
             {
-                return make_reqs();
+                return make_reqs(Perm::administrate);
             }
 
             Option<EndpointOutput> call(EndpointInput const&) override
             {
-                ProjectName name{
-                    "test_project"
-                };
-
-                (void) _db->transact<ProjectID>([&]
-                {
-                    Project p;
-                    p.name = name.val;
-                    return ProjectID{
-                        _db->persist(p)
-                    };
-                });
-                
-                return EndpointOutput("debug-ok");
+                return EndpointOutput(Unit{});
             }
 
         private:

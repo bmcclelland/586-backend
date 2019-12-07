@@ -11,7 +11,7 @@ namespace mvc
     class SqliteConfig
     {
         public:
-            SqliteConfig(Config const&);
+            explicit SqliteConfig(Config const&);
             SqliteDbPath db_path() const;
 
         private:

@@ -1,10 +1,8 @@
 #pragma once
 
 #include "iendpoint.h"
-#include "util/containers.h"
-#include "util/string.h"
-#include "data/data.h"
 #include "idatabase/idatabase.h"
+#include "data/data.h"
 
 namespace mvc::endpoints
 {
@@ -20,27 +18,9 @@ namespace mvc::endpoints
                 ProjectID project_id;
             };
             
-            GetProject(Unique<IDatabase> db, PathArgs path)
-                : _db(std::move(db))
-                , _path(path)
-            {
-                println("GetProject::GetProject");
-            }
-            
-            Requirements requirements() const override
-            {
-                return make_reqs(Perm::view_project);
-            }
-
-            Option<EndpointOutput> call(EndpointInput const&) override
-            {
-                return EndpointOutput(get_project());
-            }
-
-            Option<Project> get_project()
-            {
-                return _db->find_value(_path.project_id);
-            }
+            GetProject(Unique<IDatabase>, PathArgs);
+            Requirements requirements() const override;
+            Option<EndpointOutput> call(EndpointInput const&) override;
 
         private:
             Unique<IDatabase> _db;

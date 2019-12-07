@@ -6,12 +6,12 @@
     
 namespace mvc::endpoints
 {
-    class AddProject : public IEndpoint
+    class UnassignTask : public IEndpoint
     {
         public:
             struct PathArgs {};
 
-            AddProject(Unique<IDatabase>, PathArgs);
+            UnassignTask(Unique<IDatabase>, PathArgs);
             Option<EndpointOutput> call(EndpointInput const&);
             Requirements requirements() const;
 

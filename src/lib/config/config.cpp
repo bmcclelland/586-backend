@@ -49,16 +49,18 @@ namespace mvc
         }
     }
 
-    Config::Config(String const& path)
+    Config::Config(ConfigPath const& path)
     {
         try
         {
-            _json = load_json_from_file(path);
+            _json = load_json_from_file(path.val());
             load_indirect_keys(_json);
         }
         catch (std::exception& e)
         {
-            throw std::runtime_error("Failed to load config '" + path + "': " + e.what());
+            throw std::runtime_error(
+                "Failed to load config '" + path.val() + "': " + e.what()
+                );
         }
     }
     

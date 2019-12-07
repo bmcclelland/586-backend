@@ -11,7 +11,7 @@ namespace mvc
     struct HttpConfig
     {
         public:
-            HttpConfig(Config const&);
+            explicit HttpConfig(Config const&);
             HttpListenAddr listen_addr() const;
 
         private:

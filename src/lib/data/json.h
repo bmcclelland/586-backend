@@ -6,6 +6,8 @@
 
 namespace mvc 
 {
+    struct Unit {};
+
     // TODO
     template <typename T>
     Vec<T> realize(Vec<LazyWeak<T>> const& xs)
@@ -51,6 +53,30 @@ namespace mvc
     {
         j = x.val;
     }
+    
+    inline
+    void to_json(Json& j, TaskName const& x)
+    {
+        j = x.val;
+    }
+    
+    inline
+    void to_json(Json& j, TaskID const& x)
+    {
+        j = x.val;
+    }
+    
+    inline
+    void to_json(Json& j, WorkerName const& x)
+    {
+        j = x.val;
+    }
+    
+    inline
+    void to_json(Json& j, WorkerID const& x)
+    {
+        j = x.val;
+    }
 
     // TODO
     inline
@@ -93,7 +119,6 @@ namespace mvc
         };
     }
 
-    // TODO
     inline
     void to_json(Json& j, Project const& x) 
     {
@@ -101,6 +126,42 @@ namespace mvc
             {"id",    x.id},
             {"name",  x.name},
             {"tasks", realize(x.tasks)}
+        };
+    }
+    
+    inline
+    void to_json(Json& j, Worker const& x) 
+    {
+        j = Json{
+            {"id",    x.id},
+            {"name",  x.name},
+            {"tasks", realize(x.tasks)}
+        };
+    }
+    
+    inline
+    void to_json(Json& j, ProjectNameID const& x) 
+    {
+        j = Json{
+            {"id",    x.id},
+            {"name",  x.name},
+        };
+    }
+    
+    inline
+    void to_json(Json& j, WorkerNameID const& x) 
+    {
+        j = Json{
+            {"id",    x.id},
+            {"name",  x.name},
+        };
+    }
+
+    inline
+    void to_json(Json& j, Unit)
+    {
+        j = Json{
+            {"()", nullptr}
         };
     }
 

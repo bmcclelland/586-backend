@@ -27,11 +27,9 @@ namespace mvc
 
         if (v == 0)
         {
-            transact([&]
-            {
-                odb::schema_catalog::create_schema(*_db);
-            });
-
+            auto tx = transaction();
+            odb::schema_catalog::create_schema(*_db);
+            tx.commit();
             println("SqliteDatabase: Created schema");
         }
     }

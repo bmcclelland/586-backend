@@ -15,6 +15,7 @@ namespace mvc
 #pragma GCC diagnostic pop
 
 #include "util/containers.h"
+#include "config/config.h"
 #include <functional>
 
 namespace mvc
@@ -42,7 +43,8 @@ namespace mvc
         Unique<IServer>,
         Unique<IHandler>,
         Unique<IRouter>,
-        Unique<IDatabase>
+        Unique<IDatabase>,
+        Config
     >;
 
     class DI

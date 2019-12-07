@@ -1,20 +1,26 @@
 #pragma once
 
 #include "iendpoint.h"
-#include "data/data.h"
 #include "idatabase/idatabase.h"
+#include "data/data.h"
 
 namespace mvc::endpoints
 {
-    class GetUsers : public IEndpoint
+    class GetTask : public IEndpoint
     {
         public:
-            struct PathArgs {};
+            struct PathArgs
+            {
+                PathArgs(int id)
+                    : task_id{id}
+                {}
 
-            GetUsers(Unique<IDatabase>, PathArgs);
+                TaskID task_id;
+            };
+            
+            GetTask(Unique<IDatabase>, PathArgs);
             Requirements requirements() const override;
             Option<EndpointOutput> call(EndpointInput const&) override;
-            Vec<User> get_users();
 
         private:
             Unique<IDatabase> _db;

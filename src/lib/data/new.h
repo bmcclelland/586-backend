@@ -13,14 +13,17 @@ namespace mvc
 {
     class Project;
     class Worker;
+    class Task;
     class User;
     class Role;
 
+    #pragma db value 
     struct ProjectName
     {
         String val;
     };
 
+    #pragma db value 
     struct ProjectID
     {
         using Type = Project;
@@ -28,6 +31,35 @@ namespace mvc
         int val;
     };
     
+    #pragma db value 
+    struct TaskName
+    {
+        String val;
+    };
+    
+    #pragma db value 
+    struct TaskID
+    {
+        using Type = Task;
+
+        int val;
+    };
+    
+    #pragma db value 
+    struct WorkerName
+    {
+        String val;
+    };
+    
+    #pragma db value 
+    struct WorkerID
+    {
+        using Type = Worker;
+
+        int val;
+    };
+    
+    #pragma db value 
     struct UserID
     {
         using Type = User;
@@ -35,6 +67,7 @@ namespace mvc
         String val;
     };
     
+    #pragma db value 
     struct RoleID
     {
         using Type = Role;
@@ -85,15 +118,26 @@ namespace mvc
     {
         friend class odb::access;
         
+        Task() = default;
+        
         public:
+            Task(TaskName name_, Shared<Project> const& project_)
+                : id(-1)
+                , name(std::move(name_.val))
+                , project(project_)
+                , worker()
+            {}
+
             #pragma db id auto
             int id;
 
             String name;
 
             #pragma db not_null
+            #pragma db on_delete(cascade)
             LazyShared<Project> project;
 
+            #pragma db on_delete(set_null)
             LazyShared<Worker> worker;
     };
 
@@ -101,8 +145,16 @@ namespace mvc
     class Project
     {
         friend class odb::access;
+
+        Project() = default;
         
         public:
+            Project(ProjectName name_)
+                : id()
+                , name(std::move(name_.val))
+                , tasks()
+            {}
+
             #pragma db id auto
             int id;
 
@@ -116,8 +168,15 @@ namespace mvc
     class Worker
     {
         friend class odb::access;
+
+        Worker() = default;
         
         public:
+            Worker(WorkerName name_)
+                : name(std::move(name_.val))
+                , tasks()
+            {}
+
             #pragma db id auto
             int id;
 
@@ -125,6 +184,20 @@ namespace mvc
             
             #pragma db value_not_null inverse(worker)
             Vec<LazyWeak<Task>> tasks;
+    };
+    
+    #pragma db view object(Project)
+    struct ProjectNameID
+    {
+        String name;
+        int    id;
+    };
+    
+    #pragma db view object(Worker)
+    struct WorkerNameID
+    {
+        String name;
+        int    id;
     };
 }
 

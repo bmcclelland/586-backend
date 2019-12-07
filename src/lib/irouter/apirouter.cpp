@@ -1,9 +1,17 @@
 #include "apirouter.h"
 #include "server/apiparse.h"
 #include "iendpoint/addproject.h"
+#include "iendpoint/delproject.h"
 #include "iendpoint/getproject.h"
 #include "iendpoint/getprojects.h"
 #include "iendpoint/getusers.h"
+#include "iendpoint/addtask.h"
+#include "iendpoint/assigntask.h"
+#include "iendpoint/unassigntask.h"
+#include "iendpoint/gettask.h"
+#include "iendpoint/addworker.h"
+#include "iendpoint/getworkers.h"
+#include "iendpoint/getworker.h"
 #include "iendpoint/debug.h"
 #include "util/print.h"
 #include "app/error.h"
@@ -16,11 +24,19 @@ namespace mvc
         using namespace mvc::endpoints;
               
         using Routes = Dyn<IEndpoint,
-            Endpoint<GetProjects, Lit("get_projects")>,
-            Endpoint<GetProject,  Lit("get_project"), Int>,
-            Endpoint<AddProject,  Lit("add_project")>,
-            Endpoint<GetUsers,    Lit("get_users")>,
-            Endpoint<Debug,       Lit("debug")>
+            Endpoint<GetProjects,   Lit("get_projects")>,
+            Endpoint<GetProject,    Lit("get_project"), Int>,
+            Endpoint<GetWorker,     Lit("get_worker"),  Int>,
+            Endpoint<GetTask,       Lit("get_task"),    Int>,
+            Endpoint<AddProject,    Lit("add_project")>,
+            Endpoint<DelProject,    Lit("del_project")>,
+            Endpoint<GetUsers,      Lit("get_users")>,
+            Endpoint<AddTask,       Lit("add_task")>,
+            Endpoint<AssignTask,    Lit("assign_task")>,
+            Endpoint<UnassignTask,  Lit("unassign_task")>,
+            Endpoint<AddWorker,     Lit("add_worker")>,
+            Endpoint<GetWorkers,    Lit("get_workers")>,
+            Endpoint<Debug,         Lit("debug")>
             >;
 
         using Api = Root<Lit("api"), Routes>;

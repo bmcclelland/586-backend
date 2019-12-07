@@ -69,46 +69,45 @@ namespace mvc
         RoleID admin_role_id = _auth_config.admin_role();
         UserID admin_user_id = _auth_config.bootstrap_admin_user();
 
-        _db->transact([&]
+        auto tx = _db->transaction();
+        Shared<Role> admin_role = tx.find_shared(admin_role_id);
+
+        if (!admin_role)
         {
-            Shared<Role> admin_role = _db->find_shared(admin_role_id);
+            Set<Perm> admin_perms{Perm::administrate};
+            admin_role = std::make_shared<Role>(admin_role_id, admin_perms);
+            tx.persist(admin_role);
+            println("Bootstrapped admin role");
+        }
 
-            if (!admin_role)
-            {
-                Set<Perm> admin_perms{Perm::administrate};
-                admin_role = std::make_shared<Role>(admin_role_id, admin_perms);
-                _db->persist(admin_role);
-                println("Bootstrapped admin role");
-            }
+        Shared<User> admin_user = tx.find_shared(admin_user_id);
 
-            Shared<User> admin_user = _db->find_shared(admin_user_id);
+        if (!admin_user)
+        {
+            admin_user = std::make_shared<User>(admin_user_id);
+            admin_user->roles.insert(admin_role);
+            tx.persist(admin_user);
+            println("Bootstrapped admin user");
+        }
 
-            if (!admin_user)
-            {
-                admin_user = std::make_shared<User>(admin_user_id);
-                admin_user->roles.insert(admin_role);
-                _db->persist(admin_user);
-                println("Bootstrapped admin user");
-            }
-        });
+        tx.commit();
     }
     
     void Authenticator::bootstrap_default() const
     {
         RoleID default_role_id = _auth_config.default_role();
 
-        _db->transact([&]
-        {
-            Shared<Role> default_role = _db->find_shared(default_role_id);
+        auto tx = _db->transaction();
+        Shared<Role> default_role = tx.find_shared(default_role_id);
 
-            if (!default_role)
-            {
-                Set<Perm> default_perms{}; // TODO defineable?
-                default_role = std::make_shared<Role>(default_role_id, default_perms);
-                _db->persist(default_role);
-                println("Bootstrapped default role");
-            }
-        });
+        if (!default_role)
+        {
+            Set<Perm> default_perms{}; // TODO defineable?
+            default_role = std::make_shared<Role>(default_role_id, default_perms);
+            tx.persist(default_role);
+            tx.commit();
+            println("Bootstrapped default role");
+        }
     }
 
     Actor Authenticator::auth(String const& jwt) const
@@ -135,7 +134,8 @@ namespace mvc
     Shared<Role> Authenticator::get_default_role() const
     {
         RoleID const role_id = _auth_config.default_role();
-        Shared<Role> role = _db->find_shared(role_id);
+        auto const tx = _db->transaction();
+        Shared<Role> role = tx.find_shared(role_id);
 
         if (role)
         {
@@ -150,7 +150,8 @@ namespace mvc
     Set<Perm> Authenticator::get_perms(AuthSubject const& subject) const
     {
         UserID const user_id{subject.val()};
-        Option<User> const user = _db->find_value(user_id);
+        auto tx = _db->transaction();
+        Option<User> const user = tx.find_value(user_id);
 
         if (user)
         {
@@ -161,14 +162,12 @@ namespace mvc
         {
             // Add new user for this user with default perms.
             println("User does not exist");
-            return _db->transact<Set<Perm>>([&]
-            {
-                Shared<Role> default_role = get_default_role();
-                User new_user(user_id);
-                new_user.roles.insert(default_role);
-                _db->persist(new_user);
-                return flatten_roles(new_user.roles);
-            });
+            Shared<Role> default_role = get_default_role();
+            User new_user(user_id);
+            new_user.roles.insert(default_role);
+            tx.persist(new_user);
+            tx.commit();
+            return flatten_roles(new_user.roles);
         }
     }
 }

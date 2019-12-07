@@ -15,7 +15,7 @@ namespace mvc
     class AuthConfig
     {
         public:
-            AuthConfig(Config const&);
+            explicit AuthConfig(Config const&);
             AuthPublicKey public_key() const;
             AuthIssuer issuer() const;
             RoleID default_role() const;

@@ -30,9 +30,18 @@ set(MVC_SOURCES
     src/lib/data/new-odb.cpp
     src/lib/idatabase/sqlitedatabase.cpp
     src/lib/iendpoint/getroles.cpp
+    src/lib/iendpoint/getusers.cpp
     src/lib/iendpoint/getprojects.cpp
     src/lib/iendpoint/getproject.cpp
     src/lib/iendpoint/addproject.cpp
+    src/lib/iendpoint/delproject.cpp
+    src/lib/iendpoint/addtask.cpp
+    src/lib/iendpoint/assigntask.cpp
+    src/lib/iendpoint/unassigntask.cpp
+    src/lib/iendpoint/gettask.cpp
+    src/lib/iendpoint/addworker.cpp
+    src/lib/iendpoint/getworkers.cpp
+    src/lib/iendpoint/getworker.cpp
     src/lib/ihandler/httphandler.cpp
     src/lib/ihandler/getjwt.cpp
     src/lib/irouter/apirouter.cpp
@@ -63,7 +72,7 @@ add_custom_command(
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(MVC_LIBS ${MVC_LIBS}
         stdc++fs
-        debug gcov
+        #debug gcov
     )
 endif ()
 
@@ -110,7 +119,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
             -Wformat=2
             -Wno-unknown-pragmas
             
-            -fprofile-arcs -ftest-coverage
+            #-fprofile-arcs -ftest-coverage
             -fsanitize=address
             -g -ggdb
         )

@@ -52,13 +52,13 @@
       <primary-key auto="true">
         <column name="id"/>
       </primary-key>
-      <foreign-key name="project_fk" deferrable="DEFERRED">
+      <foreign-key name="project_fk" deferrable="DEFERRED" on-delete="CASCADE">
         <column name="project"/>
         <references table="Project">
           <column name="id"/>
         </references>
       </foreign-key>
-      <foreign-key name="worker_fk" deferrable="DEFERRED">
+      <foreign-key name="worker_fk" deferrable="DEFERRED" on-delete="SET NULL">
         <column name="worker"/>
         <references table="Worker">
           <column name="id"/>

@@ -6,6 +6,7 @@
 #include "util/print.h"
 #include "util/typename.h"
 #include "auth/requirements.h"
+#include "data/json.h"
 
 namespace mvc
 {
