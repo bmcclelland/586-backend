@@ -9,4 +9,5 @@
 #include <odb/transaction.hxx>
 #include <odb/sqlite/database.hxx>
 #include <odb/schema-catalog.hxx>
+#include <odb/nullable.hxx>
 #pragma GCC diagnostic pop

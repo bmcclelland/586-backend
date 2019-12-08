@@ -4,7 +4,7 @@
 #include "util/string.h"
 #include "util/lazy.h"
 #include "auth/perm.h"
-//#include "util/newtype.h"
+#include <odb/nullable.hxx>
 
 #pragma db model version(1, 1)
 
@@ -198,6 +198,28 @@ namespace mvc
     {
         String name;
         int    id;
+    };
+
+    #pragma db view object(Task) object(Project) object(Worker)
+    struct TaskDetails
+    {
+        #pragma db column(Task::name)
+        String name;
+        
+        #pragma db column(Task::id)
+        int id;
+
+        #pragma db column(Project::name)
+        String project_name;
+        
+        #pragma db column(Project::id)
+        int project_id;
+        
+        #pragma db column(Worker::name)
+        odb::nullable<String> worker_name;
+        
+        #pragma db column(Worker::id)
+        odb::nullable<int> worker_id;
     };
 }
 

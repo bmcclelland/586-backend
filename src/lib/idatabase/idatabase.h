@@ -88,10 +88,10 @@ namespace mvc
             return db.query<T>();
         }
         
-        template <typename T>
-        odb::result<T> query(odb::query<T> const& q) const
+        template <typename T, typename Q>
+        odb::result<T> query(Q const& q) const
         {
-            return db.query(q);
+            return db.query<T>(q);
         }
         
         template <typename T>

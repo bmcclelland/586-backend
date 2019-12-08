@@ -156,6 +156,32 @@ namespace mvc
             {"name",  x.name},
         };
     }
+    
+    inline
+    void to_json(Json& j, TaskDetails const& x) 
+    {
+        Json project{
+            {"name", x.project_name},
+            {"id",   x.project_id}
+        };
+
+        Json worker;
+
+        if (x.worker_id && x.worker_name)
+        {
+            worker = Json{
+                {"name", *x.worker_name},
+                {"id",   *x.worker_id}
+            };
+        }
+        
+        j = Json{
+            {"id",    x.id},
+            {"name",  x.name},
+            {"project", project },
+            {"worker", worker }
+        };
+    }
 
     inline
     void to_json(Json& j, Unit)

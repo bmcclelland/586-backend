@@ -17,13 +17,17 @@ namespace mvc::endpoints
     Option<EndpointOutput> GetTask::call(EndpointInput const&)
     {
         auto const tx = _db->transaction();
-        Option<Task> task = tx.find_value(_path.task_id);
+        using Q = odb::query<TaskDetails>;
 
-        if (!task)
+        auto query = tx.query<TaskDetails>(
+            Q::Task::id == _path.task_id.val
+            );
+
+        for (auto&& result : query)
         {
-            return nullopt;
+            return EndpointOutput(result);
         }
 
-        return EndpointOutput(*task);
+        return nullopt;
     }
 }

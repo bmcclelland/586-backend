@@ -99,7 +99,7 @@ namespace mvc::test
         auto rtr = injector.create<Unique<IRouter>>();
         Actor admin("test|admin", {Perm::administrate});
     
-        auto run_test = [&](Json&& json, auto const&... path)
+        auto endpoint = [&](Json&& json, auto const&... path)
         {
             EndpointInput input(std::move(json), admin);
             auto output = rtr->route(test_path("api", path...), input);
@@ -114,20 +114,21 @@ namespace mvc::test
             }
         };
         
-        auto print_test = [&](Json&& json, auto const&... path)
+        [[maybe_unused]]
+        auto print_endpoint = [&](Json&& json, auto const&... path)
         {
-            auto result = run_test(std::move(json), path...);
+            auto result = endpoint(std::move(json), path...);
             println(result.dump());
             return result;
         };
         
         clear_db();
         
-        {
-            run_test({{"name", "p"}}, "add_project");
-            run_test({{"name", "t"}, {"project_id", 1}}, "add_task");
-            run_test({}, "get_projects");
-            Json actual = run_test({}, "get_project", "1");
+        { // Add a project -- project looks ok
+            endpoint({{"name", "p"}}, "add_project");
+            endpoint({{"name", "t"}, {"project_id", 1}}, "add_task");
+            endpoint({}, "get_projects");
+            Json actual = endpoint({}, "get_project", "1");
             Json ideal_task{
                 {"id", 1}, 
                 {"name", "t"}, 
@@ -141,11 +142,25 @@ namespace mvc::test
             };
             TEST_EQ(actual, ideal);
         }
+
+        { // Add a task -- task looks ok
+            Json actual = endpoint({}, "get_task", "1");
+            Json ideal{
+                {"id", 1},
+                {"name", "t"},
+                {"project", {
+                    {"id", 1},
+                    {"name", "p"},
+                }},
+                {"worker", nullptr}
+            };
+            TEST_EQ(actual, ideal);
+        }
        
-        {
-            run_test({{"name", "w"}}, "add_worker");
-            run_test({{"task_id", 1}, {"worker_id", 1}}, "assign_task");
-            Json actual = run_test({}, "get_worker", "1");
+        { // Add a worker, assign to task -- worker looks ok
+            endpoint({{"name", "w"}}, "add_worker");
+            endpoint({{"task_id", 1}, {"worker_id", 1}}, "assign_task");
+            Json actual = endpoint({}, "get_worker", "1");
             Json ideal_task{
                 {"id", 1}, 
                 {"name", "t"}, 
@@ -159,10 +174,27 @@ namespace mvc::test
             };
             TEST_EQ(actual, ideal);
         }
+        
+        { // Task has a worker now
+            Json actual = endpoint({}, "get_task", "1");
+            Json ideal{
+                {"id", 1},
+                {"name", "t"},
+                {"project", {
+                    {"id", 1},
+                    {"name", "p"},
+                }},
+                {"worker", {
+                    {"id", 1},
+                    {"name", "w"},
+                }}
+            };
+            TEST_EQ(actual, ideal);
+        }
 
-        {
-            run_test({{"name", "p2"}}, "add_project");
-            Json actual = run_test({}, "get_projects");
+        { // Add a project -- getting both projects looks ok
+            endpoint({{"name", "p2"}}, "add_project");
+            Json actual = endpoint({}, "get_projects");
             Json ideal_p{
                 {"id", 1}, 
                 {"name", "p"}
@@ -175,9 +207,9 @@ namespace mvc::test
             TEST_EQ(actual, ideal);
         }
         
-        {
-            run_test({{"name", "w2"}}, "add_worker");
-            Json actual = run_test({}, "get_workers");
+        { // Add a worker -- getting both workers looks ok
+            endpoint({{"name", "w2"}}, "add_worker");
+            Json actual = endpoint({}, "get_workers");
             Json ideal_w{
                 {"id", 1}, 
                 {"name", "w"}
@@ -190,11 +222,11 @@ namespace mvc::test
             TEST_EQ(actual, ideal);
         }
 
-        {
-            run_test({{"id", 1}}, "del_project");
-            TEST_EQ(run_test({}, "get_project", "1"), Json{});
-            TEST_EQ(run_test({}, "get_task", "1"), Json{});
-            Json actual = run_test({}, "get_worker", "1");  
+        { // Delete a project -- project and task are gone, worker lacks task
+            endpoint({{"id", 1}}, "del_project");
+            TEST_EQ(endpoint({}, "get_project", "1"), Json{});
+            TEST_EQ(endpoint({}, "get_task", "1"), Json{});
+            Json actual = endpoint({}, "get_worker", "1");  
             Json ideal{
                 {"id", 1},
                 {"name", "w"},
@@ -206,7 +238,6 @@ namespace mvc::test
 
     void main()
     {
-        
         DI::make_injector = []()
         {
             return di::make_injector(
