@@ -110,29 +110,98 @@ namespace mvc::test
             }
             else
             {
-                return Json{"nullopt"};
+                return Json{};
             }
         };
-
-        clear_db();
-        run_test({{"name", "p"}}, "add_project");
-        run_test({{"name", "t"}, {"project_id", 1}}, "add_task");
-        run_test({}, "get_projects");
-        Json actual = run_test({}, "get_project", "1");
         
-        Json ideal_task{
-            {"id", 1}, 
-            {"name", "t"}, 
-            {"project", 1}, 
-            {"worker", nullptr}
+        auto print_test = [&](Json&& json, auto const&... path)
+        {
+            auto result = run_test(std::move(json), path...);
+            println(result.dump());
+            return result;
         };
-        Json ideal{
-            {"id", 1},
-            {"name", "p"},
-            {"tasks", { ideal_task } } 
-        };
+        
+        clear_db();
+        
+        {
+            run_test({{"name", "p"}}, "add_project");
+            run_test({{"name", "t"}, {"project_id", 1}}, "add_task");
+            run_test({}, "get_projects");
+            Json actual = run_test({}, "get_project", "1");
+            Json ideal_task{
+                {"id", 1}, 
+                {"name", "t"}, 
+                {"project", 1}, 
+                {"worker", nullptr}
+            };
+            Json ideal{
+                {"id", 1},
+                {"name", "p"},
+                {"tasks", { ideal_task } } 
+            };
+            TEST_EQ(actual, ideal);
+        }
+       
+        {
+            run_test({{"name", "w"}}, "add_worker");
+            run_test({{"task_id", 1}, {"worker_id", 1}}, "assign_task");
+            Json actual = run_test({}, "get_worker", "1");
+            Json ideal_task{
+                {"id", 1}, 
+                {"name", "t"}, 
+                {"project", 1}, 
+                {"worker", 1}
+            };
+            Json ideal{
+                {"id", 1},
+                {"name", "w"},
+                {"tasks", { ideal_task } } 
+            };
+            TEST_EQ(actual, ideal);
+        }
 
-        TEST_EQ(actual, ideal);
+        {
+            run_test({{"name", "p2"}}, "add_project");
+            Json actual = run_test({}, "get_projects");
+            Json ideal_p{
+                {"id", 1}, 
+                {"name", "p"}
+            };
+            Json ideal_p2{
+                {"id", 2}, 
+                {"name", "p2"}
+            };
+            Json ideal{ ideal_p, ideal_p2 };
+            TEST_EQ(actual, ideal);
+        }
+        
+        {
+            run_test({{"name", "w2"}}, "add_worker");
+            Json actual = run_test({}, "get_workers");
+            Json ideal_w{
+                {"id", 1}, 
+                {"name", "w"}
+            };
+            Json ideal_w2{
+                {"id", 2}, 
+                {"name", "w2"}
+            };
+            Json ideal{ ideal_w, ideal_w2 };
+            TEST_EQ(actual, ideal);
+        }
+
+        {
+            run_test({{"id", 1}}, "del_project");
+            TEST_EQ(run_test({}, "get_project", "1"), Json{});
+            TEST_EQ(run_test({}, "get_task", "1"), Json{});
+            Json actual = run_test({}, "get_worker", "1");  
+            Json ideal{
+                {"id", 1},
+                {"name", "w"},
+                {"tasks", Json::array()}
+            };
+            TEST_EQ(actual, ideal);
+        }
     )
 
     void main()
