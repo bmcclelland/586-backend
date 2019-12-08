@@ -20,10 +20,10 @@ namespace mvc
     SqliteDatabase::SqliteDatabase(SqliteConfig const& config)
         : _db(make_db(config.db_path().val()))
     {
-        println("SqliteDatabase::SqliteDatabase");
+//        println("SqliteDatabase::SqliteDatabase");
 
         odb::schema_version v (_db->schema_version());
-        println("SqliteDatabase: Schema version = ", v);
+//        println("SqliteDatabase: Schema version = ", v);
 
         if (v == 0)
         {

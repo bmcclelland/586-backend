@@ -6,7 +6,7 @@ namespace mvc::endpoints
         : _db(std::move(db))
         , _path(path)
     {
-        println("AddWorker::AddWorker");
+        println(">AddWorker");
     }
     
     Requirements AddWorker::requirements() const

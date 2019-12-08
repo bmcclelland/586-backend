@@ -17,7 +17,7 @@ namespace mvc::endpoints
             Debug(Unique<IDatabase> db, PathArgs)
                 : _db(std::move(db))
             {
-                println("Debug::Debug");
+                println(">Debug");
             }
             
             Requirements requirements() const override

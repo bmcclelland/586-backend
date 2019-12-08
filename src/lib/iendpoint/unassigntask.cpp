@@ -6,7 +6,7 @@ namespace mvc::endpoints
         : _db(std::move(db))
         , _path(path)
     {
-        println("UnassignTask::UnassignTask");
+        println(">UnassignTask");
     }
     
     Requirements UnassignTask::requirements() const

@@ -6,7 +6,7 @@ namespace mvc::endpoints
         : _db(std::move(db))
         , _path(path)
     {
-        println("GetProject::GetProject");
+        println(">GetProject");
     }
     
     Requirements GetProject::requirements() const

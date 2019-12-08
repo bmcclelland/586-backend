@@ -6,7 +6,7 @@ namespace mvc::endpoints
         : _db(std::move(db))
         , _path(path)
     {
-        println("GetRoles::GetRoles");
+        println(">GetRoles");
     }
 
     Requirements GetRoles::requirements() const

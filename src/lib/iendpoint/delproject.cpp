@@ -6,7 +6,7 @@ namespace mvc::endpoints
         : _db(std::move(db))
         , _path(path)
     {
-        println("DelProject::DelProject");
+        println(">DelProject");
     }
     
     Requirements DelProject::requirements() const

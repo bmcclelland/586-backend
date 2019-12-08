@@ -6,7 +6,7 @@ namespace mvc::endpoints
         : _db(std::move(db))
         , _path(path)
     {
-        println("AssignTask::AssignTask");
+        println(">AssignTask");
     }
     
     Requirements AssignTask::requirements() const
