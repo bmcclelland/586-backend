@@ -17,7 +17,7 @@ namespace mvc
         }
         else
         {
-            println("No auth token");
+//            println("No auth token");
             return nullopt;
         }
     }
@@ -34,14 +34,16 @@ namespace mvc
 
     HttpResponse HttpHandler::handle(HttpRequest& req)
     {
-        println("Httphandler::handle ",
-            req.method(),
-            " ",
-            req.relative_uri().to_string()
-        );
-
+        if (req.method() != HttpMethods::OPTIONS)
+        {
+            println("Httphandler::handle ",
+                req.method(),
+                " ",
+                req.relative_uri().to_string()
+            );
+        }
             
-           if (req.method() == HttpMethods::OPTIONS)
+        if (req.method() == HttpMethods::OPTIONS)
         {
             HttpResponse rsp;
             rsp.set_status_code(HttpStatusCode(200));

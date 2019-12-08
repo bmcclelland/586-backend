@@ -36,7 +36,7 @@ namespace mvc
                     auth_config.issuer().val()
                 );
             verifier.verify(decoded_jwt);
-            println("JWT verification succeeded");
+   //         println("JWT verification succeeded");
             return AuthSubject{
                 decoded_jwt.get_subject()
             };
@@ -77,7 +77,7 @@ namespace mvc
             Set<Perm> admin_perms{Perm::administrate};
             admin_role = std::make_shared<Role>(admin_role_id, admin_perms);
             tx.persist(admin_role);
-            println("Bootstrapped admin role");
+            println("Generated admin role");
         }
 
         Shared<User> admin_user = tx.find_shared(admin_user_id);
@@ -87,7 +87,7 @@ namespace mvc
             admin_user = std::make_shared<User>(admin_user_id);
             admin_user->roles.insert(admin_role);
             tx.persist(admin_user);
-            println("Bootstrapped admin user");
+            println("Generated admin user");
         }
 
         tx.commit();
@@ -106,14 +106,14 @@ namespace mvc
             default_role = std::make_shared<Role>(default_role_id, default_perms);
             tx.persist(default_role);
             tx.commit();
-            println("Bootstrapped default role");
+            println("Generated default role");
         }
     }
 
     Actor Authenticator::auth(String const& jwt) const
     {
         auto const subject = verify_auth(jwt, _auth_config);
-        println("Subject is '", subject.val(), "'");
+//        println("Subject is '", subject.val(), "'");
         auto const perms = get_perms(subject);
         return Actor(subject, perms);
     }
@@ -155,18 +155,18 @@ namespace mvc
 
         if (user)
         {
-            println("User exists");
+//            println("User exists");
             return flatten_roles(user->roles);
         }
         else
         {
             // Add new user for this user with default perms.
-            println("User does not exist");
             Shared<Role> default_role = get_default_role();
             User new_user(user_id);
             new_user.roles.insert(default_role);
             tx.persist(new_user);
             tx.commit();
+            println("Added new user '", user_id.val, "'with default perms");
             return flatten_roles(new_user.roles);
         }
     }
