@@ -186,9 +186,7 @@ namespace mvc
     inline
     void to_json(Json& j, Unit)
     {
-        j = Json{
-            {"()", nullptr}
-        };
+        j = Json{};
     }
 
 } // namespace ns
