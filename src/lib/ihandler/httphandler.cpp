@@ -77,11 +77,12 @@ namespace mvc
 
                 if (result)
                 {
+//                    println("Output: ", result->payload.dump());
                     return json_response_ok(HttpStatusCode(200), result->payload);
                 }
                 else
                 {
-                    println("EndpointOutput = nullopt");
+                    println("Output: nullopt");
                     return json_response_err(HttpStatusCode(200), Json{":("});
                 }
             }
