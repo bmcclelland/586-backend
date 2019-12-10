@@ -345,7 +345,7 @@ Only for the frontend, located [here](https://github.com/bmcclelland/586-fronten
 
 # Backend systemd service
 
-I added a systemd user service on the backend server to keep the application running in the event of a crash, and to store logs using the system's journalctl. It's a user service, so it can be stopped and started without needing superuser access.
+I added a systemd user service so that the application starts on system start and restarts if it crashes. It also stores logs using the system's journalctl. It's a user service, so it can be stopped and started without needing superuser access.
 
 ```
 [Unit]
