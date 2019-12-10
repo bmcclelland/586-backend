@@ -368,3 +368,25 @@ WantedBy=multi-user.target
 The backend, when compiled in debug mode, produces an `mvc` executable as well as a `tests` executable. The tests can be found [here](https://github.com/bmcclelland/586-backend/blob/master/src/test/main.cpp). 
 
 There are tests for API parsing and most API endpoints.
+
+# External config
+
+Configuration is stored in `config.json` and `config.test.json` for test config. Sample config:
+
+```json
+{
+    "http_listen_addr": "http://0.0.0.0:8001",
+    "sqlite_db_path": "prod.sqlite",
+    "auth_issuer": "https://dev-ztmxpnax.auth0.com/",
+    "auth_default_role": "default",
+    "auth_admin_role": "administrator",
+    "auth_bootstrap_admin_user": "google-oauth2|1234567890",
+    "auth_jwt_leeway_secs": 600,
+
+    "load_from_files": {
+        "auth_public_key": "auth.pub"
+    }
+}
+```
+
+Some classes take configuration objects as dependencies. For example, [SqliteDatabase](https://github.com/bmcclelland/586-backend/blob/master/src/lib/idatabase/sqlitedatabase.h) takes a [SqliteConfig](https://github.com/bmcclelland/586-backend/blob/master/src/lib/config/sqlite.h). These configuration classes depend on a Config (which loads the JSON file), which in turn depends on a ConfigPath, which is bound in the dependency injector. So by binding just the config file path, any number of specific config classes can be used in implementation classes without any knowledge of them being needed outside of their immediate user.
