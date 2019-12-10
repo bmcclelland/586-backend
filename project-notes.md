@@ -190,7 +190,7 @@ pub struct AssignTaskView {
 }
 ```
 
-In Rust, `#[derive(...)]` is a way to automatically generate code for a type. `Template` and the `#[template(...)]` directive say that this class is represented by a static template with a specific path (so it can check the templates at compile time). The class's members (and only them) will be available to use inside the template. This specific template is located [here](https://github.com/bmcclelland/586-frontend/blob/master/templates/assign_task.html).
+In Rust, `#[derive(...)]` is a way to automatically generate code for a type. `Template` and the `#[template(...)]` directive say that this class is represented by a static template with a specific path (so it can check the templates at compile time). The class's members (and only they) will be available to use inside the template. This specific template is located [here](https://github.com/bmcclelland/586-frontend/blob/master/templates/assign_task.html).
 
 The frontend controller is just a handler for the different `Msg` subtypes. Here is the AssignTask handler:
 
@@ -293,7 +293,7 @@ The JWT is pulled out of the request on the backend [here](https://github.com/bm
 
 # Client URL routing
 
-The frontent uses the URL hash fragment to navigate. The user can go to a specific page directly through a url (such as [/#/projects](http://586-frontend.s3-website-us-east-1.amazonaws.com/#/projects). This is done by sending `Msg::Route` at init time, which calls `route` to find the appropriate message to send into the event loop:
+The frontend uses the URL hash fragment to navigate. The user can go to a specific page directly through a url (such as [/#/projects](http://586-frontend.s3-website-us-east-1.amazonaws.com/#/projects). This is done by sending `Msg::Route` at init time, which calls `route` to find the appropriate message to send into the event loop:
 
 [link](https://github.com/bmcclelland/586-frontend/blob/master/src/msg.rs#L143)
 ```
