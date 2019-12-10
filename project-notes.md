@@ -1,8 +1,10 @@
-# General
+# SPA
 
-The backend is a standalone C++ application.
+The backend is a standalone C++ application implementing an HTTP REST API. Results are returned as JSON.
 
-The frontend is a Rust application that compiles to webassembly. It includes a JavaScript loader and an HTML index, so it is served normally like any website.
+The frontend is Rust code that compiles to webassembly. It includes a JavaScript loader and an HTML index, so it is served normally like any website. 
+
+The frontend uses an SPA framework based on a message loop. Messages are inserted into the loop (from user actions, etc), which when handled can update the model and rerender if necessary. In most cases, the messages make GET or POST requests to the backend and the model is updated with the result.
 
 # ORM
 
@@ -19,7 +21,7 @@ For example, Project contains a vector of LazyWeak<Task>, so a Project can be re
 ### One-to-many
 
 [link](https://github.com/bmcclelland/586-backend/blob/master/src/lib/data/new.h#L117)
-```
+```C++
     #pragma db object
     class Project
     {
@@ -78,7 +80,7 @@ For example, Project contains a vector of LazyWeak<Task>, so a Project can be re
 Each Project has many Tasks. A Task has a lazy shared reference to its Project, and a Project has a vector of lazy weak references to its Tasks. Example of adding a Task to a Project:
 
 [link](https://github.com/bmcclelland/586-backend/blob/master/src/lib/iendpoint/addtask.cpp#L17)
-```
+```C++
     // tx is a transaction guard. When it goes out of scope, the transaction is rolled back if it has not been committed.
     auto tx = _db->transaction();
  
@@ -100,7 +102,7 @@ Each Project has many Tasks. A Task has a lazy shared reference to its Project, 
 Views can be created that include multiple DB classes. Here is the most complex one:
 
 [link](https://github.com/bmcclelland/586-backend/blob/master/src/lib/data/new.h#L204)
-```
+```C++
     #pragma db view object(Task) object(Project) object(Worker)
     struct TaskDetails
     {
@@ -129,7 +131,7 @@ This class is a view of 3 objects: Task, Project, and Worker. The members need p
 Example of retrieving this view:
 
 [link](https://github.com/bmcclelland/586-backend/blob/master/src/lib/iendpoint/gettask.cpp#L17)
-```
+```C++
     auto const tx = _db->transaction();
     
     // This is a type alias to a query<T> type that allows you to write queries in natural C++.
@@ -160,7 +162,7 @@ Example of retrieving this view:
 Views, once fetched by an endpoint, are serialized into JSON (this must be written manually since C++ lacks reflection). Example:
 
 [link](https://github.com/bmcclelland/586-backend/blob/master/src/lib/data/json.h#L151)
-```
+```C++
 void to_json(Json& j, WorkerNameID const& x) 
 {
     j = Json{
@@ -179,7 +181,7 @@ void to_json(Json& j, WorkerNameID const& x)
 For views, `Model` contains a `Scene` enum (a tagged union made of multiple types) which collects together different view types. Example of a view type:
 
 [link](https://github.com/bmcclelland/586-frontend/blob/master/src/views.rs#L26)
-```
+```Rust
 #[derive(Template)]
 #[template(path = "assign_task.html")]
 pub struct AssignTaskView {
@@ -188,12 +190,12 @@ pub struct AssignTaskView {
 }
 ```
 
-In Rust, `#[derive(...)]` is a way to automatically generate code for a type. `Template` and the `#[template(...)]` directive say that this class is represented by a static template with a specific path. The class's members will be available to use inside the template. This template is located [here](https://github.com/bmcclelland/586-frontend/blob/master/templates/assign_task.html).
+In Rust, `#[derive(...)]` is a way to automatically generate code for a type. `Template` and the `#[template(...)]` directive say that this class is represented by a static template with a specific path (so it can check the templates at compile time). The class's members (and only them) will be available to use inside the template. This specific template is located [here](https://github.com/bmcclelland/586-frontend/blob/master/templates/assign_task.html).
 
 The frontend controller is just a handler for the different `Msg` subtypes. Here is the AssignTask handler:
 
 [link](https://github.com/bmcclelland/586-frontend/blob/master/src/msg.rs#L448)
-```
+```Rust
 // Msgs only allow one parameter, so this takes a tuple of (TaskId, WorkerId).
 Msg::AssignTask((task_id, worker_id)) => {
     // Build the POST body.
@@ -210,3 +212,27 @@ Msg::AssignTask((task_id, worker_id)) => {
 }
 ```
 (model.post() and fetch!() are located in the same file. Both actions are too ugly to do inline.)
+
+# Dependency Injection
+
+This uses the boost::di library. Here is the "production" injector and its use:
+[link](https://github.com/bmcclelland/586-backend/blob/master/src/mvc/main.cpp)
+```C++
+DI::make_injector = []()
+{
+    return di::make_injector(
+        di::bind<IServer>.to<HttpServer>().in(di::unique),
+        di::bind<IHandler>.to<HttpHandler>().in(di::unique),
+        di::bind<IRouter>.to<ApiRouter>().in(di::unique),
+        di::bind<IDatabase>.to<SqliteDatabase>().in(di::unique),
+        di::bind<>.to(ConfigPath("config.json"))
+    );
+};
+
+auto app = DI::make_injector().create<App>();
+app.start();
+```
+
+`DI` is a static class with a `make_injector` member whose type is a function object returning an injector. This sets that function to be a closure that returns the given injector. The `in` part specifies the scope; `unique` creates a new object each time `injector.create<T>()` is called.
+
+The "testing" injector is defined [here](https://github.com/bmcclelland/586-backend/blob/master/src/test/main.cpp#L241). Other implementation classes could be bound here, though as it happened I only changed the `ConfigPath` binding. The `Config` class (see [here](https://github.com/bmcclelland/586-backend/tree/master/src/lib/config)) takes it as its construction parameter, so when you create a Config, it takes the path specified in the injector. Other configuration classes then use that object to read in their members from the Config's JSON data.
