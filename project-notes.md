@@ -216,6 +216,7 @@ Msg::AssignTask((task_id, worker_id)) => {
 # Dependency Injection
 
 This uses the boost::di library. Here is the "production" injector and its use:
+
 [link](https://github.com/bmcclelland/586-backend/blob/master/src/mvc/main.cpp)
 ```C++
 DI::make_injector = []()
@@ -233,6 +234,67 @@ auto app = DI::make_injector().create<App>();
 app.start();
 ```
 
-`DI` is a static class with a `make_injector` member whose type is a function object returning an injector. This sets that function to be a closure that returns the given injector. The `in` part specifies the scope; `unique` creates a new object each time `injector.create<T>()` is called.
+`DI` is a static class with a `make_injector` member whose type is a function object returning an injector. This sets that function to be a closure that returns the given injector. The `in` call specifies the scope; here `unique` is used, which creates a new object each time `injector.create<T>()` is called.
 
-The "testing" injector is defined [here](https://github.com/bmcclelland/586-backend/blob/master/src/test/main.cpp#L241). Other implementation classes could be bound here, though as it happened I only changed the `ConfigPath` binding. The `Config` class (see [here](https://github.com/bmcclelland/586-backend/tree/master/src/lib/config)) takes it as its construction parameter, so when you create a Config, it takes the path specified in the injector. Other configuration classes then use that object to read in their members from the Config's JSON data.
+The "testing" injector is defined [here](https://github.com/bmcclelland/586-backend/blob/master/src/test/main.cpp#L241). Other implementation classes could be bound here, though as it happened I only changed the `ConfigPath` binding. This determines where the `Config` class (see [here](https://github.com/bmcclelland/586-backend/tree/master/src/lib/config)) reads its JSON data, which is then used by other configuration classes (such as [AuthConfig](https://github.com/bmcclelland/586-backend/blob/master/src/lib/config/auth.h)).
+
+Another use of the injector is where IEndpoints are parsed:
+
+[link](https://github.com/bmcclelland/586-backend/blob/master/src/lib/server/apiparse.h#L364)
+```C++
+auto const path_args = std::make_from_tuple<typename T::PathArgs>(r->result);
+
+auto injector = di::make_injector(
+    DI::make_injector(),
+    di::bind<typename T::PathArgs>.to(path_args)
+    );  
+
+return R(
+    r->next_state,
+    std::make_tuple(Shared<T>(
+        injector.template create<Unique<T>>())
+        )
+    );
+```
+This code is not easy to read, but what happens is that every IEndpoint subclass has a PathArgs public type (here, `T` is the endpoint type). When arguments come from the URL path (such as the `1` in `api/get_task/1`), the endpoint's PathArgs are constructed from them and then that is injected into the endpoint's constructor along with its other dependencies. This code binds the PathArgs in a new injector made from the existing injector (ex: [gettask.h](https://github.com/bmcclelland/586-backend/blob/master/src/lib/iendpoint/gettask.h)).
+
+# Authentication
+
+This app uses third-party authentication through Auth0. Most of the relevant code is [here](https://github.com/bmcclelland/586-frontend/blob/master/src/authservice.rs). Most of the work is done in a `js!` macro which allows running inline JavaScript. The result of the auth attempt is returned through a captured Rust callback which sends `Msg::AuthReady` with the auth state (handled [here](https://github.com/bmcclelland/586-frontend/blob/master/src/msg.rs#L311)). If successful, the auth state contains the JWT.
+
+The JWT is inserted into request header inside this code. It is a new interface I added onto the library's `http::Request::Builder` class:
+
+[link](https://github.com/bmcclelland/586-frontend/blob/master/src/msg.rs#L84)
+```Rust
+impl Authable for http::request::Builder
+{
+    fn add_auth(&mut self, auth: &AuthState) -> &mut Self
+    {
+        match auth {
+            AuthState::Yes(user) => {
+                self.header("Authorization", format!("Bearer {}", user.token))
+            }
+            _ => {
+                self
+            }
+        }
+    }
+}
+```
+Which can be used while building a web request like:
+```Rust
+Request::get(format!("{}/api/{}", remote_host(), action))
+    .add_auth(&self.auth_state) // &self here is a reference to our Model.
+    .body(Nothing)
+    .unwrap()
+```
+
+The JWT is pulled out of the request on the backend [here](https://github.com/bmcclelland/586-backend/blob/master/src/lib/ihandler/getjwt.cpp) and verified [here](https://github.com/bmcclelland/586-backend/blob/master/src/lib/auth/authenticator.cpp). Once we have the subject, it is used the user's unique ID.
+
+# Hosting on AWS S3
+
+The frontend is hosted [here](http://586-frontend.s3-website-us-east-1.amazonaws.com/)
+
+# Deployment scripts
+
+Only for the frontend, located [here](https://github.com/bmcclelland/586-frontend/blob/master/tools/deploy-to-s3). It builds the app, replaces the backend address with the production one, syncs with the bucket, and then sets the correct Content-Type of the .wasm file.
