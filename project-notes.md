@@ -291,10 +291,80 @@ Request::get(format!("{}/api/{}", remote_host(), action))
 
 The JWT is pulled out of the request on the backend [here](https://github.com/bmcclelland/586-backend/blob/master/src/lib/ihandler/getjwt.cpp) and verified [here](https://github.com/bmcclelland/586-backend/blob/master/src/lib/auth/authenticator.cpp). Once we have the subject, it is used the user's unique ID.
 
+# Client URL routing
+
+The frontent uses the URL hash fragment to navigate. The user can go to a specific page directly through a url (such as [/#/projects](http://586-frontend.s3-website-us-east-1.amazonaws.com/#/projects). This is done by sending `Msg::Route` at init time, which calls `route` to find the appropriate message to send into the event loop:
+
+[link](https://github.com/bmcclelland/586-frontend/blob/master/src/msg.rs#L143)
+```
+fn route(path: Vec<String>) -> Msg {
+    let slices : Vec<&str> = path.iter().map(|s| s.as_ref()).collect();
+    match slices.as_slice() {
+        []             => Msg::Null,
+        ["projects"]   => Msg::GetProjects,
+        ["workers"]    => Msg::GetWorkers,
+        ["users"]      => Msg::GetUsers,
+        ["project", n] => Msg::GetProject(parse_with_default(n, 0)),
+        ["worker", n]  => Msg::GetWorker(parse_with_default(n, 0)),
+        ["task", n]    => Msg::GetTask(parse_with_default(n, 0)),
+        ["assign", n]  => Msg::PreViewAssignTask(parse_with_default(n, 0)),
+        _              => Msg::Null,
+    }
+}
+```
+
+On view change, the hash fragment is updated based on the Scene type:
+
+[link](https://github.com/bmcclelland/586-frontend/blob/master/src/views.rs#L62)
+```Rust
+impl Scene {
+    pub fn hash_path(&self) -> String {
+        match self {
+            Scene::Null                 => "".into(),
+            Scene::Projects(_)          => "projects".into(),
+            Scene::Workers(_)           => "workers".into(),
+            Scene::Users(_)             => "users".into(),
+            Scene::ProjectDetails(view) => format!("project/{}", view.project.id),
+            Scene::WorkerDetails(view)  => format!("worker/{}", view.worker.id),
+            Scene::TaskDetails(view)    => format!("task/{}", view.task.id),
+            Scene::AssignTask(view)     => format!("assign/{}", view.task.id),
+        }
+    }
+}
+```
+
+The hash fragment is gotten and set through the Model's [LocService](https://github.com/bmcclelland/586-frontend/blob/master/src/locservice.rs). 
+
 # Hosting on AWS S3
 
-The frontend is hosted [here](http://586-frontend.s3-website-us-east-1.amazonaws.com/)
+The frontend is hosted [here](http://586-frontend.s3-website-us-east-1.amazonaws.com/).
 
 # Deployment scripts
 
 Only for the frontend, located [here](https://github.com/bmcclelland/586-frontend/blob/master/tools/deploy-to-s3). It builds the app, replaces the backend address with the production one, syncs with the bucket, and then sets the correct Content-Type of the .wasm file.
+
+# Backend systemd service
+
+I added a systemd user service on the backend server to keep the application running in the event of a crash, and to store logs using the system's journalctl. It's a user service, so it can be stopped and started without needing superuser access.
+
+```
+[Unit]
+Description=mvc
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/b/mvc
+ExecStart=/home/b/mvc/run
+Restart=on-failure
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+# Tests
+
+The backend, when compiled in debug mode, produces an `mvc` executable as well as a `tests` executable. The tests can be found [here](https://github.com/bmcclelland/586-backend/blob/master/src/test/main.cpp). 
+
+There are tests for API parsing and most API endpoints.
