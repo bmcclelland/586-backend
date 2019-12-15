@@ -11,7 +11,7 @@ namespace mvc::endpoints
 
     Requirements GetWorkers::requirements() const
     {
-        return make_reqs(Perm::view_worker);
+        return make_reqs(perms::read_workers);
     }
 
     Option<EndpointOutput> GetWorkers::call(EndpointInput const&)

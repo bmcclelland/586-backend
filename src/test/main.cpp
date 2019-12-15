@@ -97,7 +97,20 @@ namespace mvc::test
     TEST(project,
         auto injector = DI::make_injector();
         auto rtr = injector.create<Unique<IRouter>>();
-        Actor admin("test|admin", {Perm::administrate});
+        Actor admin("test|admin", {
+            perms::read_projects,
+            perms::read_workers,
+            perms::read_tasks,
+            perms::create_projects,
+            perms::create_workers,
+            perms::create_tasks,
+            perms::modify_projects,
+            perms::modify_workers,
+            perms::modify_tasks,
+            perms::delete_projects,
+            perms::delete_workers,
+            perms::delete_tasks
+            });
     
         auto endpoint = [&](Json&& json, auto const&... path)
         {

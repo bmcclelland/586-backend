@@ -14,8 +14,6 @@ namespace mvc
     class Project;
     class Worker;
     class Task;
-    class User;
-    class Role;
 
     #pragma db value 
     struct ProjectName
@@ -59,60 +57,6 @@ namespace mvc
         int val;
     };
     
-    #pragma db value 
-    struct UserID
-    {
-        using Type = User;
-
-        String val;
-    };
-    
-    #pragma db value 
-    struct RoleID
-    {
-        using Type = Role;
-
-        String val;
-    };
-
-    #pragma db object
-    class Role
-    {
-        friend class odb::access;
-
-        Role() = default;
-
-        public:
-            Role(RoleID id_, Set<Perm> perms_)
-                : name(std::move(id_.val))
-                , perms(std::move(perms_))
-            {}
-
-            #pragma db id
-            String name;
-
-            Set<Perm> perms;
-    };
-
-    #pragma db object
-    class User
-    {
-        friend class odb::access;
-
-        User() = default;
-
-        public:
-            User(UserID id_)
-                : id(std::move(id_.val))
-            {}
-
-            #pragma db id
-            String id;
-
-            #pragma db value_not_null
-            Set<Shared<Role>> roles;
-    };
-
     #pragma db object
     class Task
     {

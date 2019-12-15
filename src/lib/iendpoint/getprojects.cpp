@@ -11,7 +11,7 @@ namespace mvc::endpoints
 
     Requirements GetProjects::requirements() const
     {
-        return make_reqs(Perm::view_project);
+        return make_reqs(perms::read_projects);
     }
 
     static

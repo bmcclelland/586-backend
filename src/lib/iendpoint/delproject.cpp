@@ -11,7 +11,7 @@ namespace mvc::endpoints
     
     Requirements DelProject::requirements() const
     {
-        return make_reqs(Perm::delete_project);
+        return make_reqs(perms::delete_projects);
     }
 
     Option<EndpointOutput> DelProject::call(EndpointInput const& input)

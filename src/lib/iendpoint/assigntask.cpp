@@ -11,7 +11,7 @@ namespace mvc::endpoints
     
     Requirements AssignTask::requirements() const
     {
-        return make_reqs(Perm::assign_task);
+        return make_reqs(perms::modify_tasks);
     }
 
     Option<EndpointOutput> AssignTask::call(EndpointInput const& input)

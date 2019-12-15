@@ -11,7 +11,7 @@ namespace mvc::endpoints
     
     Requirements AddProject::requirements() const
     {
-        return make_reqs(Perm::create_project);
+        return make_reqs(perms::create_projects);
     }
 
     Option<EndpointOutput> AddProject::call(EndpointInput const& input)

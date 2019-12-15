@@ -12,6 +12,10 @@ namespace mvc
 {
     void main()
     {
+#ifndef _WIN32
+        setenv("SSL_CERT_DIR","/etc/ssl/certs",1);
+#endif
+
         DI::make_injector = []()
         {
             return di::make_injector(

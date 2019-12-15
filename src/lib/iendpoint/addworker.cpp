@@ -11,7 +11,7 @@ namespace mvc::endpoints
     
     Requirements AddWorker::requirements() const
     {
-        return make_reqs(Perm::create_worker);
+        return make_reqs(perms::create_workers);
     }
 
     Option<EndpointOutput> AddWorker::call(EndpointInput const& input)

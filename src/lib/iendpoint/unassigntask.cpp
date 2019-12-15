@@ -11,7 +11,7 @@ namespace mvc::endpoints
     
     Requirements UnassignTask::requirements() const
     {
-        return make_reqs(Perm::assign_task);
+        return make_reqs(perms::modify_tasks);
     }
 
     Option<EndpointOutput> UnassignTask::call(EndpointInput const& input)

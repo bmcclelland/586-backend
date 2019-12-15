@@ -29,8 +29,6 @@ set(MVC_SOURCES
     src/lib/data/new.cpp
     src/lib/data/new-odb.cpp
     src/lib/idatabase/sqlitedatabase.cpp
-    src/lib/iendpoint/getroles.cpp
-    src/lib/iendpoint/getusers.cpp
     src/lib/iendpoint/getprojects.cpp
     src/lib/iendpoint/getproject.cpp
     src/lib/iendpoint/addproject.cpp
@@ -50,6 +48,7 @@ set(MVC_SOURCES
     src/lib/server/apipath.cpp
     src/lib/util/color.cpp
     src/lib/http.cpp
+    src/lib/httpclient.cpp
 )
 
 set(MVC_LIBS 

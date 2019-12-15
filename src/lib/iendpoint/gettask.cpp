@@ -11,7 +11,7 @@ namespace mvc::endpoints
     
     Requirements GetTask::requirements() const
     {
-        return make_reqs(Perm::view_task);
+        return make_reqs(perms::read_tasks);
     }
 
     Option<EndpointOutput> GetTask::call(EndpointInput const&)

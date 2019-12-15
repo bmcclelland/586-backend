@@ -15,25 +15,17 @@ namespace mvc
         }
         else
         {
-            if (actor->perms().count(Perm::administrate))
+            for (Perm const& req : _reqs)
             {
-                // Has master permission.
-                return true;
-            }
-            else
-            {
-                for (Perm req : _reqs)
+                if (!actor->perms().count(req))
                 {
-                    if (!actor->perms().count(req))
-                    {
-                        // Lacking a required permission.
-                        return false;
-                    }
+                    // Lacking a required permission.
+                    return false;
                 }
-
-                // Has all requires permissions.
-                return true;
             }
+
+            // Has all requires permissions.
+            return true;
         }
     }
 }

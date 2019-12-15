@@ -102,24 +102,6 @@ namespace mvc
     }
 
     inline
-    void to_json(Json& j, Role const& x)
-    {
-        j = Json{
-            {"id",       x.name},
-            {"perms",    x.perms}
-        };
-    }
-
-    inline
-    void to_json(Json& j, User const& x)
-    {
-        j = Json{
-            {"id",       x.id},
-            {"roles",    x.roles}
-        };
-    }
-
-    inline
     void to_json(Json& j, Project const& x) 
     {
         j = Json{

@@ -22,7 +22,7 @@ namespace mvc::endpoints
             
             Requirements requirements() const override
             {
-                return make_reqs(Perm::administrate);
+                return make_reqs();
             }
 
             Option<EndpointOutput> call(EndpointInput const&) override

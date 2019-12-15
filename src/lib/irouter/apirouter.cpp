@@ -4,7 +4,6 @@
 #include "iendpoint/delproject.h"
 #include "iendpoint/getproject.h"
 #include "iendpoint/getprojects.h"
-#include "iendpoint/getusers.h"
 #include "iendpoint/addtask.h"
 #include "iendpoint/assigntask.h"
 #include "iendpoint/unassigntask.h"
@@ -30,7 +29,6 @@ namespace mvc
             Endpoint<GetTask,       Lit("get_task"),    Int>,
             Endpoint<AddProject,    Lit("add_project")>,
             Endpoint<DelProject,    Lit("del_project")>,
-            Endpoint<GetUsers,      Lit("get_users")>,
             Endpoint<AddTask,       Lit("add_task")>,
             Endpoint<AssignTask,    Lit("assign_task")>,
             Endpoint<UnassignTask,  Lit("unassign_task")>,
